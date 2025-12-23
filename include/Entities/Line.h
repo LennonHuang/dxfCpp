@@ -12,10 +12,4 @@ public:
 
     // Draw with the given OpenGL functions resolver
     void draw(QOpenGLFunctions_3_3_Core* f) const override;
-
-    // Initialize GL buffers (must be called with a current context)
-    void createBuffers(QOpenGLFunctions_3_3_Core* f);
-
-private:
-    std::vector<float> vertices;
 };

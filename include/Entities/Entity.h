@@ -34,4 +34,7 @@ protected:
     // OpenGL handles for a simple VAO + VBO
     GLuint _vAO = 0;
     GLuint _vBO = 0;
+
+    // vertices for OpenGL to display
+    std::vector<float> vertices;
 };
