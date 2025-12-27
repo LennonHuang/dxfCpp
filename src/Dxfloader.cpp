@@ -3,6 +3,7 @@
 #include <Entities/Line.h>
 #include <Entities/Circle.h>
 #include <Entities/Arc.h>
+#include <Entities/Polyline.h>
 
 DxfLoader::DxfLoader() {}
 
@@ -46,11 +47,14 @@ void DxfLoader::addCircle(const DRW_Circle& data)
 
 void DxfLoader::addLWPolyline(const DRW_LWPolyline& data)
 {
-	std::cout << "lwply size:" << data.vertlist.size() << std::endl;;
-	for (auto& v : data.vertlist)
-	{
-		std::cout << "(x,y):" << v->x << ":" << v->y << " bulge:" << v->bulge << std::endl;
-	}
+	std::cout << "lwply size:" << data.vertlist.size() << std::endl;
+
+	if (data.vertlist.empty())
+		return;
+
+	auto polyline = std::make_shared<Polyline>(data);
+	polyline->setColor(1.0f, 1.0f, 1.0f); // Example: blue color for polylines
+	_entities.push_back(polyline);
 }
 
 void DxfLoader::addArc(const DRW_Arc& data) 
