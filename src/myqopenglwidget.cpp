@@ -33,14 +33,6 @@ void MyQOpenGLWidget::initializeGL()
     m_renderer = new Render2D(width(), height());
     m_renderer->initGL(f);
     m_renderer->setupProjection(f);
-
-    DxfLoader loader;
-    if (loader.load("C:/Users/lenno/Downloads/test.dxf")) {
-        for (auto& entity : loader.getEntities()) {
-            entity->createBuffers(f);
-            m_renderer->addEntity(entity);
-        }
-    }
 }
 
 void MyQOpenGLWidget::resizeGL(int w, int h)
@@ -65,6 +57,38 @@ void MyQOpenGLWidget::paintGL()
     if (m_renderer) {
         m_renderer->render(f);
     }
+}
+
+void MyQOpenGLWidget::loadDxf(const QString& fileName)
+{
+	OnClearDxf(); // Clear existing entities
+    if (!m_renderer)
+    {
+        return;
+    }
+
+    makeCurrent();  // IMPORTANT: ensure GL context is current
+
+    // Ask for the 3.3 Core functions for the current context
+    auto* f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(context());
+    if (!f) {
+        qFatal("Failed to get OpenGL 3.3 core functions");
+        return;
+    }
+
+    DxfLoader loader;
+    std::string path = fileName.toLocal8Bit().constData(); // Window Chinese Character Friendly 
+    if (loader.load(path)) {
+        for (auto& entity : loader.getEntities()) {
+            entity->createBuffers(f);
+            m_renderer->addEntity(entity);
+        }
+
+        // update draw
+		update();
+    }
+
+    doneCurrent();  // release context
 }
 
 void MyQOpenGLWidget::wheelEvent(QWheelEvent* event)
@@ -133,3 +157,20 @@ void MyQOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
         event->ignore();
     }
 }
+
+void MyQOpenGLWidget::OnClearDxf()
+{
+    if (!m_renderer)
+        return;
+
+    makeCurrent(); // Ensure OpenGL context is current
+
+    auto* f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(context());
+    if (f) {
+        m_renderer->clearEntities(f);
+        update(); // Trigger repaint
+    }
+
+    doneCurrent();
+}
+

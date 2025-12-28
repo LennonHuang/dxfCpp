@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<UI version="4.0" >
+<ui version="4.0">
  <class>AutoDxfCppClass</class>
- <widget class="QMainWindow" name="AutoDxfCppClass" >
-  <property name="objectName" >
-   <string notr="true">AutoDxfCppClass</string>
-  </property>
-  <property name="geometry" >
+ <widget class="QMainWindow" name="AutoDxfCppClass">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -13,15 +10,41 @@
     <height>400</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>AutoDxfCpp</string>
-  </property>  <widget class="QMenuBar" name="menuBar" />
-  <widget class="QToolBar" name="mainToolBar" />
-  <widget class="QWidget" name="centralWidget" />
-  <widget class="QStatusBar" name="statusBar" />
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>600</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuLoad">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionLoad"/>
+    <addaction name="actionClear"/>
+   </widget>
+   <addaction name="menuLoad"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+  </action>
  </widget>
- <layoutDefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
-
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
  <connections/>
-</UI>
+</ui>

@@ -2,16 +2,20 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_AutoDxfCpp.h"
+#include "myqopenglwidget.h"
 
 class AutoDxfCpp : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    AutoDxfCpp(QWidget *parent = nullptr);
-    ~AutoDxfCpp();
+	AutoDxfCpp(QWidget* parent = nullptr);
+	~AutoDxfCpp();
 
 private:
-    Ui::AutoDxfCppClass ui;
-};
+	Ui::AutoDxfCppClass ui;
+	MyQOpenGLWidget* m_oglWidget;
 
+private slots:
+	void OnLoadDxf();
+};

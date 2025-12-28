@@ -12,6 +12,7 @@
 
 #include "Entities/Entity.h"
 #include "Camera.h"
+#include "Entities/Axis.h"
 
 class Render2D
 {
@@ -28,6 +29,8 @@ public:
     void render(QOpenGLFunctions_3_3_Core* f);
     void resize(int width, int height, QOpenGLFunctions_3_3_Core* f);
 
+    void clearEntities(QOpenGLFunctions_3_3_Core* f);
+
     void handlePan(float dx, float dy);
     void handleZoom(float delta, double mouseX, double mouseY);
 
@@ -36,6 +39,8 @@ private:
     GLuint createShaderProgram(QOpenGLFunctions_3_3_Core* f, const char* vertexSrc, const char* fragmentSrc);
 
     glm::vec2 screenToWorld(double sx, double sy) const;
+
+    std::unique_ptr<Axis> _xAxis, _yAxis;
 
 private:
     int _width;

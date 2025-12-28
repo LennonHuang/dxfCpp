@@ -49,6 +49,12 @@ void Render2D::initGL(QOpenGLFunctions_3_3_Core* f)
     f->glViewport(0, 0, _width, _height);
 
     setupProjection(f);
+
+	// X and Y axes
+    _xAxis = std::make_unique<Axis>(Axis::X, _height * 0.1f);
+    _yAxis = std::make_unique<Axis>(Axis::Y, _height * 0.1f);
+    _xAxis->createBuffers(f);
+    _yAxis->createBuffers(f);
 }
 
 void Render2D::setupProjection(QOpenGLFunctions_3_3_Core* f)
@@ -79,6 +85,12 @@ void Render2D::render(QOpenGLFunctions_3_3_Core* f)
         f->glUniform3fv(colorLoc, 1, entity->getColor());
         entity->draw(f);  // Entity::draw takes f
     }
+
+	// Draw axes
+    f->glUniform3fv(colorLoc, 1, _xAxis->getColor());
+    _xAxis->draw(f);
+    f->glUniform3fv(colorLoc, 1, _yAxis->getColor());
+    _yAxis->draw(f);
 }
 
 void Render2D::resize(int width, int height, QOpenGLFunctions_3_3_Core* f)
@@ -148,4 +160,11 @@ glm::vec2 Render2D::screenToWorld(double sx, double sy) const
     float wx = static_cast<float>(sx);
     float wy = static_cast<float>(_height - sy);
     return glm::vec2(wx, wy);
+}
+
+void Render2D::clearEntities(QOpenGLFunctions_3_3_Core* f) {
+    for (auto& entity : _entities) {
+        entity->deleteBuffers(f); // Free OpenGL resources
+    }
+    _entities.clear();
 }
