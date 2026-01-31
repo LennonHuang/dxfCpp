@@ -17,6 +17,9 @@ public:
     void pan(float dx, float dy);
     void reset() { _zoom = 1.0f; _offset = glm::vec2(0.0f); }
 
+	double getScale() const { return _zoom; }
+	glm::vec2 getOffset() const { return _offset; }
+
     glm::mat4 getMatrix() const {
         glm::mat4 view = glm::mat4(1.0f);
         view = glm::translate(view, glm::vec3(_offset, 0.0f));

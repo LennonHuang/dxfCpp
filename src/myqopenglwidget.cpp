@@ -6,6 +6,7 @@ MyQOpenGLWidget::MyQOpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent),
     m_renderer(nullptr)
 {
+    setMouseTracking(true);
 }
 
 MyQOpenGLWidget::~MyQOpenGLWidget()
@@ -126,8 +127,13 @@ void MyQOpenGLWidget::mousePressEvent(QMouseEvent* event)
 
 void MyQOpenGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
+    QPoint currentPos = event->pos();
+    // Update Position on MainWindow Status Bar
+	glm::vec2 wpos = m_renderer->getMouseWorldPos(currentPos);
+    emit MouseMoved(QPointF(wpos.x,wpos.y));
+
+	// Handle panning
     if (m_panning && m_renderer) {
-        QPoint currentPos = event->pos();
         QPoint delta = currentPos - m_lastMousePos;
 
         // Convert to pan amount (you might want to adjust the sensitivity)

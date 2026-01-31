@@ -9,7 +9,7 @@
 
 // Include Qt¡¯s OpenGL 3.3 core functions
 #include <QOpenGLFunctions_3_3_Core>
-
+#include <QPoint>
 #include "Entities/Entity.h"
 #include "Camera.h"
 #include "Entities/Axis.h"
@@ -33,6 +33,9 @@ public:
 
     void handlePan(float dx, float dy);
     void handleZoom(float delta, double mouseX, double mouseY);
+
+	// from mouse position to world position
+	glm::vec2 getMouseWorldPos(const QPoint&);
 
 private:
     GLuint compileShader(QOpenGLFunctions_3_3_Core* f, GLenum type, const char* source);

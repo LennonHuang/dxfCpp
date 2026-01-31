@@ -155,11 +155,23 @@ GLuint Render2D::createShaderProgram(QOpenGLFunctions_3_3_Core* f, const char* v
     return prog;
 }
 
+/// <summary>
+/// Screen Coordinates (sx, sy) to World Coordinates (wx, wy)
+/// </summary>
+/// <param name="sx"></param>
+/// <param name="sy"></param>
+/// <returns></returns>
 glm::vec2 Render2D::screenToWorld(double sx, double sy) const
 {
     float wx = static_cast<float>(sx);
     float wy = static_cast<float>(_height - sy);
     return glm::vec2(wx, wy);
+}
+
+glm::vec2 Render2D::getMouseWorldPos(const QPoint& mousePos)
+{
+	auto worldPosInPixels = screenToWorld(mousePos.x(), mousePos.y());
+    return (glm::vec2(worldPosInPixels.x, worldPosInPixels.y) - _camera.getOffset()) / static_cast<float>(_camera.getScale());
 }
 
 void Render2D::clearEntities(QOpenGLFunctions_3_3_Core* f) {

@@ -18,4 +18,5 @@ private:
 
 private slots:
 	void OnLoadDxf();
+	void OnMouseMoved(const QPointF& pos);
 };

@@ -19,6 +19,8 @@ public:
 
 public slots:
 	void OnClearDxf();
+signals:
+	void MouseMoved(const QPointF&);
 
 protected:  
    void initializeGL() override;  
