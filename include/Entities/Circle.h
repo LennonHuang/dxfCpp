@@ -10,4 +10,5 @@ public:
     Circle(float cx, float cy, float radius, int segments = 64);
 
     void draw(QOpenGLFunctions_3_3_Core* f) const;
+    std::string getType() const override { return "Circle"; }
 };

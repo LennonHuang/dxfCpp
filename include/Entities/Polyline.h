@@ -21,6 +21,8 @@ public:
     // Implement pure virtual function from Entity
     void draw(QOpenGLFunctions_3_3_Core* f) const override;
 
+    std::string getType() const override { return "Polyline"; }
+
 private:
     std::vector<PolylineVertex> m_plyvertices;
     bool isClosed = false;

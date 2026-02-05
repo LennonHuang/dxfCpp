@@ -19,4 +19,6 @@ private:
 private slots:
 	void OnLoadDxf();
 	void OnMouseMoved(const QPointF& pos);
+	void OnUpdateTreeModel(QStandardItemModel* model);
+	void onTreeItemClicked(const QModelIndex& index);
 };

@@ -20,6 +20,12 @@ AutoDxfCpp::AutoDxfCpp(QWidget* parent)
 	connect(ui.actionLoad, &QAction::triggered, this, &AutoDxfCpp::OnLoadDxf);
 	connect(ui.actionClear, &QAction::triggered, m_oglWidget, &MyQOpenGLWidget::OnClearDxf);
     connect(m_oglWidget, &MyQOpenGLWidget::MouseMoved, this, &AutoDxfCpp::OnMouseMoved);
+
+    // Tree View
+    ui.treeView->setHeaderHidden(true);
+    connect(m_oglWidget, &MyQOpenGLWidget::UpdateTreeModel, this, &AutoDxfCpp::OnUpdateTreeModel);
+    connect(ui.treeView, &QTreeView::clicked,
+        this, &AutoDxfCpp::onTreeItemClicked);
 }
 
 AutoDxfCpp::~AutoDxfCpp()
@@ -40,4 +46,32 @@ void AutoDxfCpp::OnLoadDxf()
         return;
 
     m_oglWidget->loadDxf(fileName);
+}
+
+void AutoDxfCpp::OnUpdateTreeModel(QStandardItemModel* model)
+{
+    model->setParent(this);// Set MainWindow as parent to take ownership
+
+    // Replace existing model if needed
+    if (ui.treeView->model()) {
+        ui.treeView->model()->deleteLater();
+    }
+
+    ui.treeView->setModel(model);
+}
+
+void AutoDxfCpp::onTreeItemClicked(const QModelIndex& index) {
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui.treeView->model());
+    if (!model) return;
+
+    QStandardItem* item = model->itemFromIndex(index);
+    if (!item) return;
+
+    Entity* entity = reinterpret_cast<Entity*>(item->data(Qt::UserRole).value<void*>());
+    if (entity) {
+        qDebug() << "Clicked entity type:" << QString::fromStdString(entity->getType());
+        // Do something with the actual entity
+		entity->setColor(1.0f, 0.0f, 0.0f); // Example: change color to red
+		m_oglWidget->update(); // Trigger redraw to see the color change
+    }
 }

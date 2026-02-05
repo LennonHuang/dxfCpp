@@ -87,6 +87,26 @@ void MyQOpenGLWidget::loadDxf(const QString& fileName)
 
         // update draw
 		update();
+        // update tree view
+        QStandardItemModel* model = new QStandardItemModel(nullptr);
+        // Build the model
+        QStandardItem* dxfItem = new QStandardItem("Dxf Entities");
+        auto entities = loader.getEntities();
+        for (int i = 0; i < entities.size(); ++i) {
+            const auto& entity = entities[i];
+
+            // Display as "Entity{index}" in the tree
+            QString itemName = QString("%1%2").arg(entity.get()->getType()).arg(i);
+
+            QStandardItem* entityItem = new QStandardItem(itemName);
+
+            // Store the raw pointer in the item using QVariant
+            entityItem->setData(QVariant::fromValue(reinterpret_cast<void*>(entity.get())), Qt::UserRole);
+
+            dxfItem->appendRow(entityItem);
+        }
+		model->appendRow(dxfItem);
+		emit UpdateTreeModel(model);
     }
 
     doneCurrent();  // release context
@@ -178,5 +198,8 @@ void MyQOpenGLWidget::OnClearDxf()
     }
 
     doneCurrent();
+
+    // Clear TreeView
+	emit UpdateTreeModel(new QStandardItemModel(nullptr));
 }
 

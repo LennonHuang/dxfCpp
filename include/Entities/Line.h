@@ -12,4 +12,5 @@ public:
 
     // Draw with the given OpenGL functions resolver
     void draw(QOpenGLFunctions_3_3_Core* f) const override;
+    std::string getType() const override { return "Polyline"; }
 };

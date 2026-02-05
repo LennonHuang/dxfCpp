@@ -6,6 +6,7 @@
 #include "Dxfloader.h"  
 #include <QMouseEvent>  
 #include <QWheelEvent>  
+#include <QStandardItemModel>
 
 class MyQOpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core  
 {  
@@ -21,6 +22,7 @@ public slots:
 	void OnClearDxf();
 signals:
 	void MouseMoved(const QPointF&);
+	void UpdateTreeModel(QStandardItemModel* model);
 
 protected:  
    void initializeGL() override;  
