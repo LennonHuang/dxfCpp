@@ -112,6 +112,12 @@ void MyQOpenGLWidget::loadDxf(const QString& fileName)
     doneCurrent();  // release context
 }
 
+void MyQOpenGLWidget::highlightSelectedEntity(Entity* selectedEntity)
+{
+	m_renderer->hightlightEntity(selectedEntity);
+    update();
+}
+
 void MyQOpenGLWidget::wheelEvent(QWheelEvent* event)
 {
     if (!m_renderer) return;

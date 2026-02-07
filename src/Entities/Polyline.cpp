@@ -71,9 +71,6 @@ void Polyline::draw(QOpenGLFunctions_3_3_Core* f) const
 	f->glBindVertexArray(_vAO);
 	f->glBindBuffer(GL_ARRAY_BUFFER, _vBO);
 
-	// Set color (assumes shader uses location 0 for position, 1 for color)
-	// This is a placeholder; actual color setting may depend on your shader setup
-
 	// Draw as line strip or loop depending on isClosed
 	GLenum mode = isClosed ? GL_LINE_LOOP : GL_LINE_STRIP;
 	f->glDrawArrays(mode, 0, static_cast<GLsizei>(vertices.size() / 2));

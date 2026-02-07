@@ -30,6 +30,7 @@ public:
     void resize(int width, int height, QOpenGLFunctions_3_3_Core* f);
 
     void clearEntities(QOpenGLFunctions_3_3_Core* f);
+    void hightlightEntity(Entity* selectedEntity);
 
     void handlePan(float dx, float dy);
     void handleZoom(float delta, double mouseX, double mouseY);

@@ -52,8 +52,14 @@
     <number>2</number>
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_right">
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <item>
+    <property name="minimumSize">
+     <size>
+      <width>276</width>
+      <height>0</height>
+     </size>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
       <widget class="QTreeView" name="treeView"/>
      </item>
     </layout>

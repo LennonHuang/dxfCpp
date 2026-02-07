@@ -7,6 +7,7 @@ layout(location = 0) in vec2 aPos;
 uniform mat4 uProjection;
 uniform vec3 uColor;
 out vec3 vColor;
+out float vDist;
 void main() {
     vColor = uColor;
     gl_Position = uProjection * vec4(aPos, 0.0, 1.0);
@@ -17,8 +18,11 @@ static const char* fragmentShaderSrc = R"(
 #version 330 core
 in vec3 vColor;
 out vec4 FragColor;
+
+uniform float alpha;
+
 void main() {
-    FragColor = vec4(vColor, 1.0);
+    FragColor = vec4(vColor, alpha);
 }
 )";
 
@@ -83,6 +87,7 @@ void Render2D::render(QOpenGLFunctions_3_3_Core* f)
 
     for (auto& entity : _entities) {
         f->glUniform3fv(colorLoc, 1, entity->getColor());
+		f->glUniform1f(f->glGetUniformLocation(_shaderProgram, "alpha"), entity->getAlpha());
         entity->draw(f);  // Entity::draw takes f
     }
 
@@ -179,4 +184,16 @@ void Render2D::clearEntities(QOpenGLFunctions_3_3_Core* f) {
         entity->deleteBuffers(f); // Free OpenGL resources
     }
     _entities.clear();
+}
+
+void Render2D::hightlightEntity(Entity* selectedEntity)
+{
+	for (auto& entity : _entities) {
+		if (selectedEntity == nullptr || entity.get() == selectedEntity) {
+			entity->setAlpha(1.0);
+		}
+		else {
+            entity->setAlpha(0.2);
+		}
+	}
 }

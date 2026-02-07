@@ -71,7 +71,10 @@ void AutoDxfCpp::onTreeItemClicked(const QModelIndex& index) {
     if (entity) {
         qDebug() << "Clicked entity type:" << QString::fromStdString(entity->getType());
         // Do something with the actual entity
-		entity->setColor(1.0f, 0.0f, 0.0f); // Example: change color to red
-		m_oglWidget->update(); // Trigger redraw to see the color change
+        m_oglWidget->highlightSelectedEntity(entity);
+    }
+    else 
+    {
+        m_oglWidget->highlightSelectedEntity(nullptr);
     }
 }

@@ -17,6 +17,7 @@ public:
 
    // Add the missing method declaration  
    void loadDxf(const QString& fileName);
+   void highlightSelectedEntity(Entity* selectedEntity);
 
 public slots:
 	void OnClearDxf();
@@ -39,7 +40,7 @@ protected:
 
 private:  
    Render2D* m_renderer;  
-
+   Entity* m_selectedEntity = nullptr;
    QPoint m_lastMousePos;  
    bool m_panning = false;  
 };

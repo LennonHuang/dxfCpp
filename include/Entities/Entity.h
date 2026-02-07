@@ -18,11 +18,15 @@ public:
 
     // Color getters/setters
     const float* getColor() const { return _color; }
+    float getAlpha() const { return _alpha; }
     void setColor(float r, float g, float b) {
         _color[0] = r;
         _color[1] = g;
         _color[2] = b;
     }
+	void setAlpha(float alpha) {
+		_alpha = alpha;
+	}
 
     // Buffer setup/teardown
     virtual void createBuffers(QOpenGLFunctions_3_3_Core* f);
@@ -30,6 +34,7 @@ public:
 
 protected:
     float _color[3] = { 1.0f, 1.0f, 1.0f };   // Default: white
+	float _alpha = 1.0f; // Default: fully opaque
 
     // OpenGL handles for a simple VAO + VBO
     GLuint _vAO = 0;
