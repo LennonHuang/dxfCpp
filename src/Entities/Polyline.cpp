@@ -14,7 +14,7 @@ Polyline::Polyline(const DRW_LWPolyline& plydata)
 		}
 	}
 
-	isClosed = (plydata.flags & 1) != 0; // check if closed flag is set: 1 for closed polyline
+	_closed = (plydata.flags & 1) != 0; // check if closed flag is set: 1 for closed polyline
 
 	// Populate the base class vertices for OpenGL, handling bulge (arc) if present
 	size_t vertCount = m_plyvertices.size();
@@ -26,7 +26,7 @@ Polyline::Polyline(const DRW_LWPolyline& plydata)
 		// Determine the next vertex index, considering closure
 		size_t nextIdx = i + 1;
 		bool hasNext = nextIdx < vertCount;
-		if (!hasNext && isClosed && vertCount > 1) {
+		if (!hasNext && _closed && vertCount > 1) {
 			nextIdx = 0;
 			hasNext = true;
 		}
@@ -71,8 +71,8 @@ void Polyline::draw(QOpenGLFunctions_3_3_Core* f) const
 	f->glBindVertexArray(_vAO);
 	f->glBindBuffer(GL_ARRAY_BUFFER, _vBO);
 
-	// Draw as line strip or loop depending on isClosed
-	GLenum mode = isClosed ? GL_LINE_LOOP : GL_LINE_STRIP;
+	// Draw as line strip or loop depending on _closed
+	GLenum mode = _closed ? GL_LINE_LOOP : GL_LINE_STRIP;
 	f->glDrawArrays(mode, 0, static_cast<GLsizei>(vertices.size() / 2));
 
 	f->glBindBuffer(GL_ARRAY_BUFFER, 0);

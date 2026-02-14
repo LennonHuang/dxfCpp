@@ -21,4 +21,5 @@ private slots:
 	void OnMouseMoved(const QPointF& pos);
 	void OnUpdateTreeModel(QStandardItemModel* model);
 	void onTreeItemClicked(const QModelIndex& index);
+	void onEntitySelected(Entity* entity);
 };

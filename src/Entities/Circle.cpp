@@ -4,6 +4,7 @@
 
 Circle::Circle(float cx, float cy, float radius, int segments)
 {
+    _closed = true;
     vertices.reserve(segments * 2);
 
     const float step = 2.0f * static_cast<float>(M_PI) / segments;

@@ -26,6 +26,8 @@ AutoDxfCpp::AutoDxfCpp(QWidget* parent)
     connect(m_oglWidget, &MyQOpenGLWidget::UpdateTreeModel, this, &AutoDxfCpp::OnUpdateTreeModel);
     connect(ui.treeView, &QTreeView::clicked,
         this, &AutoDxfCpp::onTreeItemClicked);
+    connect(m_oglWidget, &MyQOpenGLWidget::EntitySelected,
+        this, &AutoDxfCpp::onEntitySelected);
 }
 
 AutoDxfCpp::~AutoDxfCpp()
@@ -73,8 +75,38 @@ void AutoDxfCpp::onTreeItemClicked(const QModelIndex& index) {
         // Do something with the actual entity
         m_oglWidget->highlightSelectedEntity(entity);
     }
-    else 
+    else
     {
         m_oglWidget->highlightSelectedEntity(nullptr);
     }
+}
+
+void AutoDxfCpp::onEntitySelected(Entity* entity)
+{
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui.treeView->model());
+    if (!model) return;
+
+    if (!entity) {
+        ui.treeView->clearSelection();
+        return;
+    }
+
+    // Search tree items for the one storing this entity pointer
+    QStandardItem* root = model->invisibleRootItem();
+    for (int i = 0; i < root->rowCount(); ++i) {
+        QStandardItem* group = root->child(i);
+        for (int j = 0; j < group->rowCount(); ++j) {
+            QStandardItem* item = group->child(j);
+            Entity* stored = reinterpret_cast<Entity*>(item->data(Qt::UserRole).value<void*>());
+            if (stored == entity) {
+                QModelIndex idx = model->indexFromItem(item);
+                ui.treeView->setCurrentIndex(idx);
+                ui.treeView->scrollTo(idx);
+                return;
+            }
+        }
+    }
+
+    // No match found — clear selection
+    ui.treeView->clearSelection();
 }

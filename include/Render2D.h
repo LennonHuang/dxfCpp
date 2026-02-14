@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// Include Qt¡¯s OpenGL 3.3 core functions
+// Include Qtï¿½ï¿½s OpenGL 3.3 core functions
 #include <QOpenGLFunctions_3_3_Core>
 #include <QPoint>
 #include "Entities/Entity.h"
@@ -31,6 +31,9 @@ public:
 
     void clearEntities(QOpenGLFunctions_3_3_Core* f);
     void hightlightEntity(Entity* selectedEntity);
+
+    // Pick the entity nearest to the given screen position, or nullptr if none within tolerance
+    Entity* pickEntity(const QPoint& screenPos);
 
     void handlePan(float dx, float dy);
     void handleZoom(float delta, double mouseX, double mouseY);

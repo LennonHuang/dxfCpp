@@ -2,6 +2,7 @@
 
 #include <string>
 #include <QOpenGLFunctions_3_3_Core>
+#include <glm/vec2.hpp>
 
 class Entity
 {
@@ -28,6 +29,9 @@ public:
 		_alpha = alpha;
 	}
 
+    // Hit test: returns true if worldPos is within tolerance of this entity's geometry
+    virtual bool hitTest(float wx, float wy, float tolerance) const;
+
     // Buffer setup/teardown
     virtual void createBuffers(QOpenGLFunctions_3_3_Core* f);
     virtual void deleteBuffers(QOpenGLFunctions_3_3_Core* f);
@@ -35,6 +39,7 @@ public:
 protected:
     float _color[3] = { 1.0f, 1.0f, 1.0f };   // Default: white
 	float _alpha = 1.0f; // Default: fully opaque
+    bool _closed = false; // Whether the shape is closed (loop vs strip)
 
     // OpenGL handles for a simple VAO + VBO
     GLuint _vAO = 0;

@@ -3,7 +3,7 @@
 #include "Entities/Entity.h"
 #include <vector>
 #include <glm/vec2.hpp>
-#include "DxfLoader.h"
+#include "Dxfloader.h"
 
 struct PolylineVertex {
     glm::vec2 position;
@@ -25,5 +25,4 @@ public:
 
 private:
     std::vector<PolylineVertex> m_plyvertices;
-    bool isClosed = false;
 };

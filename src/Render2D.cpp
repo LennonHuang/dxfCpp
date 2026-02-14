@@ -30,7 +30,7 @@ Render2D::Render2D(int width, int height)
     : _width(width), _height(height), _shaderProgram(0),
     _camera((float)width, (float)height)
 {
-    // No GL calls here ¡ª only in initGL.
+    // No GL calls here ï¿½ï¿½ only in initGL.
 }
 
 Render2D::~Render2D()
@@ -196,4 +196,18 @@ void Render2D::hightlightEntity(Entity* selectedEntity)
             entity->setAlpha(0.2);
 		}
 	}
+}
+
+Entity* Render2D::pickEntity(const QPoint& screenPos)
+{
+    glm::vec2 worldPos = getMouseWorldPos(screenPos);
+    // Tolerance in world units: ~5 pixels at current zoom
+    float tolerance = 5.0f / static_cast<float>(_camera.getScale());
+
+    for (auto& entity : _entities) {
+        if (entity->hitTest(worldPos.x, worldPos.y, tolerance)) {
+            return entity.get();
+        }
+    }
+    return nullptr;
 }

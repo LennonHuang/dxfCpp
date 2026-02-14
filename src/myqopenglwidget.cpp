@@ -96,7 +96,7 @@ void MyQOpenGLWidget::loadDxf(const QString& fileName)
             const auto& entity = entities[i];
 
             // Display as "Entity{index}" in the tree
-            QString itemName = QString("%1%2").arg(entity.get()->getType()).arg(i);
+            QString itemName = QString("%1%2").arg(QString::fromStdString(entity.get()->getType())).arg(i);
 
             QStandardItem* entityItem = new QStandardItem(itemName);
 
@@ -144,6 +144,13 @@ void MyQOpenGLWidget::mousePressEvent(QMouseEvent* event)
         m_lastMousePos = event->pos();
         m_panning = true;
         setCursor(Qt::ClosedHandCursor);
+        event->accept();
+    }
+    else if (event->button() == Qt::LeftButton && m_renderer) {
+        Entity* picked = m_renderer->pickEntity(event->pos());
+        m_selectedEntity = picked;
+        highlightSelectedEntity(picked);
+        emit EntitySelected(picked);
         event->accept();
     }
     else {
