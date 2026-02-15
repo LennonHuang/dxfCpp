@@ -1,5 +1,6 @@
 #include "Render2D.h"
 #include <iostream>
+#include <cmath>
 
 static const char* vertexShaderSrc = R"(
 #version 330 core
@@ -59,6 +60,16 @@ void Render2D::initGL(QOpenGLFunctions_3_3_Core* f)
     _yAxis = std::make_unique<Axis>(Axis::Y, _height * 0.1f);
     _xAxis->createBuffers(f);
     _yAxis->createBuffers(f);
+
+    // Grid VAO/VBO (dynamic, uploaded each frame)
+    f->glGenVertexArrays(1, &_gridVAO);
+    f->glGenBuffers(1, &_gridVBO);
+    f->glBindVertexArray(_gridVAO);
+    f->glBindBuffer(GL_ARRAY_BUFFER, _gridVBO);
+    f->glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), nullptr);
+    f->glEnableVertexAttribArray(0);
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    f->glBindVertexArray(0);
 }
 
 void Render2D::setupProjection(QOpenGLFunctions_3_3_Core* f)
@@ -84,6 +95,9 @@ void Render2D::render(QOpenGLFunctions_3_3_Core* f)
     f->glUniformMatrix4fv(loc, 1, GL_FALSE, &viewProj[0][0]);
 
     GLint colorLoc = f->glGetUniformLocation(_shaderProgram, "uColor");
+
+    // Draw grid behind everything
+    drawGrid(f, viewProj);
 
     for (auto& entity : _entities) {
         f->glUniform3fv(colorLoc, 1, entity->getColor());
@@ -196,6 +210,74 @@ void Render2D::hightlightEntity(Entity* selectedEntity)
             entity->setAlpha(0.2);
 		}
 	}
+}
+
+void Render2D::drawGrid(QOpenGLFunctions_3_3_Core* f, const glm::mat4& viewProj)
+{
+    // Compute visible world-space bounds from the camera
+    glm::vec2 offset = _camera.getOffset();
+    float zoom = static_cast<float>(_camera.getScale());
+
+    float worldLeft   = -offset.x / zoom;
+    float worldBottom = -offset.y / zoom;
+    float worldRight  = (_width  - offset.x) / zoom;
+    float worldTop    = (_height - offset.y) / zoom;
+
+    // Choose grid spacing: target ~20-40 lines across the viewport
+    float viewWidth = worldRight - worldLeft;
+    float rawSpacing = viewWidth / 20.0f;
+
+    // Snap to 1-2-5 sequence: ..., 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, ...
+    float mag = std::pow(10.0f, std::floor(std::log10(rawSpacing)));
+    float norm = rawSpacing / mag;
+    float spacing;
+    if (norm < 1.5f)       spacing = 1.0f * mag;
+    else if (norm < 3.5f)  spacing = 2.0f * mag;
+    else if (norm < 7.5f)  spacing = 5.0f * mag;
+    else                   spacing = 10.0f * mag;
+
+    // Build grid line vertices
+    std::vector<float> gridVerts;
+
+    float startX = std::floor(worldLeft / spacing) * spacing;
+    float startY = std::floor(worldBottom / spacing) * spacing;
+
+    // Vertical lines
+    for (float x = startX; x <= worldRight; x += spacing) {
+        gridVerts.push_back(x);
+        gridVerts.push_back(worldBottom);
+        gridVerts.push_back(x);
+        gridVerts.push_back(worldTop);
+    }
+
+    // Horizontal lines
+    for (float y = startY; y <= worldTop; y += spacing) {
+        gridVerts.push_back(worldLeft);
+        gridVerts.push_back(y);
+        gridVerts.push_back(worldRight);
+        gridVerts.push_back(y);
+    }
+
+    if (gridVerts.empty()) return;
+
+    // Upload to GPU
+    f->glBindBuffer(GL_ARRAY_BUFFER, _gridVBO);
+    f->glBufferData(GL_ARRAY_BUFFER,
+        gridVerts.size() * sizeof(float),
+        gridVerts.data(),
+        GL_DYNAMIC_DRAW);
+    f->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Draw grid with subtle color
+    GLint colorLoc = f->glGetUniformLocation(_shaderProgram, "uColor");
+    GLint alphaLoc = f->glGetUniformLocation(_shaderProgram, "alpha");
+    float gridColor[3] = { 0.3f, 0.3f, 0.3f };
+    f->glUniform3fv(colorLoc, 1, gridColor);
+    f->glUniform1f(alphaLoc, 0.5f);
+
+    f->glBindVertexArray(_gridVAO);
+    f->glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(gridVerts.size() / 2));
+    f->glBindVertexArray(0);
 }
 
 Entity* Render2D::pickEntity(const QPoint& screenPos)

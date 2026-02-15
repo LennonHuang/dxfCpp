@@ -46,6 +46,7 @@ private:
     GLuint createShaderProgram(QOpenGLFunctions_3_3_Core* f, const char* vertexSrc, const char* fragmentSrc);
 
     glm::vec2 screenToWorld(double sx, double sy) const;
+    void drawGrid(QOpenGLFunctions_3_3_Core* f, const glm::mat4& viewProj);
 
     std::unique_ptr<Axis> _xAxis, _yAxis;
 
@@ -57,4 +58,7 @@ private:
 
     Camera2D _camera;
     std::vector<std::shared_ptr<Entity>> _entities;
+
+    GLuint _gridVAO = 0;
+    GLuint _gridVBO = 0;
 };
