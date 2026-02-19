@@ -26,6 +26,8 @@ AutoDxfCpp::AutoDxfCpp(QWidget* parent)
     connect(m_oglWidget, &MyQOpenGLWidget::UpdateTreeModel, this, &AutoDxfCpp::OnUpdateTreeModel);
     connect(ui.treeView, &QTreeView::clicked,
         this, &AutoDxfCpp::onTreeItemClicked);
+	connect(m_oglWidget, &MyQOpenGLWidget::EntitySelected,
+		this, &AutoDxfCpp::onEntitySelectedInViewport);
 }
 
 AutoDxfCpp::~AutoDxfCpp()
@@ -77,4 +79,29 @@ void AutoDxfCpp::onTreeItemClicked(const QModelIndex& index) {
     {
         m_oglWidget->highlightSelectedEntity(nullptr);
     }
+}
+
+void AutoDxfCpp::onEntitySelectedInViewport(Entity* entity)
+{
+    QStandardItemModel* model = qobject_cast<QStandardItemModel*>(ui.treeView->model());
+    if (!model) return;
+
+    if (!entity) {
+        ui.treeView->clearSelection();
+        return;
+    }
+
+    // Search through tree items to find the matching entity pointer
+    QStandardItem* root = model->item(0); // "Dxf Entities" item
+    if (!root) return;
+
+    for (int i = 0; i < root->rowCount(); ++i) {
+        QStandardItem* item = root->child(i);
+        Entity* itemEntity = reinterpret_cast<Entity*>(item->data(Qt::UserRole).value<void*>());
+        if (itemEntity == entity) {
+            ui.treeView->setCurrentIndex(item->index());
+            return;
+        }
+    }
+    ui.treeView->clearSelection();
 }

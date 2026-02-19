@@ -32,6 +32,9 @@ public:
     virtual void createBuffers(QOpenGLFunctions_3_3_Core* f);
     virtual void deleteBuffers(QOpenGLFunctions_3_3_Core* f);
 
+	// Hit test: check if (worldX, worldY) is within 'tolerance' of the entity.
+    virtual bool hitTest(float worldX, float worldY, float tolerance) const;
+
 protected:
     float _color[3] = { 1.0f, 1.0f, 1.0f };   // Default: white
 	float _alpha = 1.0f; // Default: fully opaque

@@ -45,3 +45,23 @@ void Entity::deleteBuffers(QOpenGLFunctions_3_3_Core* f)
         _vAO = 0;
     }
 }
+
+bool Entity::hitTest(float worldX, float worldY, float tolerance) const
+{
+    // Walk vertex pairs (x1,y1, x2,y2, ...) as line segments
+    int vertCount = vertices.size() / 2;
+    for (int i = 0; i < vertCount - 1; ++i) {
+        float x1 = vertices[i * 2], y1 = vertices[i * 2 + 1];
+        float x2 = vertices[(i + 1) * 2], y2 = vertices[(i + 1) * 2 + 1];
+
+        // Point-to-segment distance
+        float dx = x2 - x1, dy = y2 - y1;
+        float lenSq = dx * dx + dy * dy;
+        float t = (lenSq > 0) ? std::clamp(((worldX - x1) * dx + (worldY - y1) * dy) / lenSq, 0.f, 1.f) : 0.f;
+        float px = x1 + t * dx, py = y1 + t * dy;
+        float dist = std::sqrt((worldX - px) * (worldX - px) + (worldY - py) * (worldY - py));
+
+        if (dist <= tolerance) return true;
+    }
+    return false;
+}

@@ -146,6 +146,17 @@ void MyQOpenGLWidget::mousePressEvent(QMouseEvent* event)
         setCursor(Qt::ClosedHandCursor);
         event->accept();
     }
+    else if (event->button() == Qt::LeftButton) 
+    {
+        // find the entity that is clicked
+        glm::vec2 worldPos = m_renderer->getMouseWorldPos(event->pos());
+		double tolerance = 5.0f / m_renderer->getCameraScale(); // Adjust tolerance based on zoom level
+		Entity* selectedEntity = m_renderer->findEntityAtPoint(worldPos.x, worldPos.y, tolerance);
+		// Highlight the selected entity
+		highlightSelectedEntity(selectedEntity);
+        emit EntitySelected(selectedEntity);
+		event->accept();
+    }
     else {
         event->ignore();
     }

@@ -179,6 +179,19 @@ glm::vec2 Render2D::getMouseWorldPos(const QPoint& mousePos)
     return (glm::vec2(worldPosInPixels.x, worldPosInPixels.y) - _camera.getOffset()) / static_cast<float>(_camera.getScale());
 }
 
+Entity* Render2D::findEntityAtPoint(float worldX, float worldY, float tolerance) const
+{
+	// reversed order to find topmost entity first
+    for (auto it = _entities.rbegin(); it != _entities.rend(); it++) 
+    {
+		if ((*it)->hitTest(worldX, worldY, tolerance))
+		{
+			return it->get();
+		}
+    }
+	return nullptr;
+}
+
 void Render2D::clearEntities(QOpenGLFunctions_3_3_Core* f) {
     for (auto& entity : _entities) {
         entity->deleteBuffers(f); // Free OpenGL resources

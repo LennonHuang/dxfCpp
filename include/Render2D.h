@@ -38,6 +38,11 @@ public:
 	// from mouse position to world position
 	glm::vec2 getMouseWorldPos(const QPoint&);
 
+	// Find the Entity that is closest to the given Point in world coordinates, within the specified tolerance.
+    Entity* findEntityAtPoint(float worldX, float worldY, float tolerance) const;
+
+	double getCameraScale() const { return _camera.getScale(); }
+
 private:
     GLuint compileShader(QOpenGLFunctions_3_3_Core* f, GLenum type, const char* source);
     GLuint createShaderProgram(QOpenGLFunctions_3_3_Core* f, const char* vertexSrc, const char* fragmentSrc);

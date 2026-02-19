@@ -24,6 +24,7 @@ public slots:
 signals:
 	void MouseMoved(const QPointF&);
 	void UpdateTreeModel(QStandardItemModel* model);
+	void EntitySelected(Entity* entity);
 
 protected:  
    void initializeGL() override;  
