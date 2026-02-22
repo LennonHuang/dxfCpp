@@ -1,17 +1,10 @@
 #pragma once
 
 #include "Entities/Entity.h"
+#include "MathHelper.h"
 #include <vector>
 #include <glm/vec2.hpp>
 #include "Dxfloader.h"
-
-struct PolylineVertex {
-    glm::vec2 position;
-    float bulge;
-
-    PolylineVertex(float x, float y, float bulge)
-        : position(x, y), bulge(bulge) {}
-};
 
 class Polyline : public Entity {
 public:
@@ -22,6 +15,9 @@ public:
     void draw(QOpenGLFunctions_3_3_Core* f) const override;
 
     std::string getType() const override { return "Polyline"; }
+
+    // Access original vertices with bulge info (for accurate arc intersection)
+    const std::vector<PolylineVertex>& getPlyVertices() const { return m_plyvertices; }
 
 private:
     std::vector<PolylineVertex> m_plyvertices;
