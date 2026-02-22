@@ -1,5 +1,17 @@
+#pragma once
+
 #include <glm/glm.hpp>
-class MathHelper 
+#include <vector>
+
+struct IntersectResult {
+    glm::vec2 point;
+    int segIndexA;   // which segment of polyline A
+    float paramA;    // parametric position [0,1] on that segment
+    int segIndexB;   // which segment of polyline B
+    float paramB;    // parametric position [0,1] on that segment
+};
+
+class MathHelper
 {
 public:
 	static constexpr float EPSILON = 1e-6f;
@@ -32,4 +44,18 @@ public:
         // Return center of the arc
         return mid + perp * h;
     }
+
+    // Test intersection of two line segments.
+    // Returns true if they intersect, with parametric positions tA, tB and the intersection point.
+    static bool SegmentIntersect(
+        const glm::vec2& a1, const glm::vec2& a2,
+        const glm::vec2& b1, const glm::vec2& b2,
+        float& tA, float& tB, glm::vec2& point);
+
+    // Find all intersection points between two polylines.
+    // Returns results sorted by vertex order along polyline A.
+    // vertsA/vertsB are flat arrays: [x0, y0, x1, y1, ...]
+    static std::vector<IntersectResult> PolylineIntersect(
+        const std::vector<float>& vertsA, bool closedA,
+        const std::vector<float>& vertsB, bool closedB);
 };

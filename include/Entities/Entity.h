@@ -29,6 +29,10 @@ public:
 		_alpha = alpha;
 	}
 
+    // Access to geometry data
+    const std::vector<float>& getVertices() const { return vertices; }
+    bool isClosed() const { return _closed; }
+
     // Hit test: returns true if worldPos is within tolerance of this entity's geometry
     virtual bool hitTest(float wx, float wy, float tolerance) const;
 
