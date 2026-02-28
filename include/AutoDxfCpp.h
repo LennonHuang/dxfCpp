@@ -9,7 +9,7 @@ class AutoDxfCpp : public QMainWindow
 	Q_OBJECT
 
 public:
-	AutoDxfCpp(QWidget* parent = nullptr);
+	AutoDxfCpp(QWidget* parent = nullptr, bool showFileMenu = true);
 	~AutoDxfCpp();
 
 private:
@@ -18,6 +18,7 @@ private:
 
 private slots:
 	void OnLoadDxf();
+	void OnNewViewer();
 	void OnMouseMoved(const QPointF& pos);
 	void OnUpdateTreeModel(QStandardItemModel* model);
 	void onTreeItemClicked(const QModelIndex& index);

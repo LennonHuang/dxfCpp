@@ -4,7 +4,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-AutoDxfCpp::AutoDxfCpp(QWidget* parent)
+AutoDxfCpp::AutoDxfCpp(QWidget* parent, bool showFileMenu)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
@@ -16,9 +16,16 @@ AutoDxfCpp::AutoDxfCpp(QWidget* parent)
     ui.centralWidget->setLayout(new QVBoxLayout());
     ui.centralWidget->layout()->addWidget(m_oglWidget);
 
-    // Top Menu
-	connect(ui.actionLoad, &QAction::triggered, this, &AutoDxfCpp::OnLoadDxf);
-	connect(ui.actionClear, &QAction::triggered, m_oglWidget, &MyQOpenGLWidget::OnClearDxf);
+    if (showFileMenu) {
+        // Top Menu
+        connect(ui.actionLoad, &QAction::triggered, this, &AutoDxfCpp::OnLoadDxf);
+        connect(ui.actionClear, &QAction::triggered, m_oglWidget, &MyQOpenGLWidget::OnClearDxf);
+        connect(ui.actionNewViewer, &QAction::triggered, this, &AutoDxfCpp::OnNewViewer);
+    } else {
+        // Hide the menu bar entirely for viewer windows
+        ui.menuBar->hide();
+    }
+
     connect(m_oglWidget, &MyQOpenGLWidget::MouseMoved, this, &AutoDxfCpp::OnMouseMoved);
 
     // Tree View
@@ -39,6 +46,14 @@ void AutoDxfCpp::OnMouseMoved(const QPointF& pos)
     ui.statusBar->showMessage(
         QString("X: %1 mm, Y: %2 mm").arg(pos.x(), 0, 'f', 2)
         .arg(pos.y(), 0, 'f', 2));
+}
+
+void AutoDxfCpp::OnNewViewer()
+{
+    AutoDxfCpp* viewer = new AutoDxfCpp(nullptr, false);
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
+    viewer->setWindowTitle("AutoDxfCpp - Viewer");
+    viewer->show();
 }
 
 void AutoDxfCpp::OnLoadDxf()
