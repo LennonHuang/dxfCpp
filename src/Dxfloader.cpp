@@ -31,6 +31,7 @@ void DxfLoader::addLine(const DRW_Line& data)
 	);
 
 	line->setColor(1.0f, 0.0f, 0.0f);
+	line->setLayer(data.layer);
 	_entities.push_back(line);
 }
 
@@ -42,6 +43,7 @@ void DxfLoader::addCircle(const DRW_Circle& data)
 		static_cast<float>(data.radious)
 	);
 	c->setColor(0.0f,1.0f, 0.0f);
+	c->setLayer(data.layer);
 	_entities.push_back(c);
 }
 
@@ -53,7 +55,8 @@ void DxfLoader::addLWPolyline(const DRW_LWPolyline& data)
 		return;
 
 	auto polyline = std::make_shared<Polyline>(data);
-	polyline->setColor(1.0f, 1.0f, 1.0f); // Example: blue color for polylines
+	polyline->setColor(1.0f, 1.0f, 1.0f);
+	polyline->setLayer(data.layer);
 	_entities.push_back(polyline);
 }
 
@@ -69,6 +72,7 @@ void DxfLoader::addArc(const DRW_Arc& data)
 	);
 
 	arc->setColor(1.0f, 0.0f, 0.0f);
+	arc->setLayer(data.layer);
 	_entities.push_back(arc);
 }
 

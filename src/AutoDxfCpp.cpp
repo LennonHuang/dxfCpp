@@ -1,13 +1,23 @@
 #include "AutoDxfCpp.h"
 #include "myqopenglwidget.h"
+#include "AutoDxfHelper.h"
+#include "Entities/Polyline.h"
 #include <QVBoxLayout>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMessageBox>
+#include <QTimer>
+#include <algorithm>
 
-AutoDxfCpp::AutoDxfCpp(QWidget* parent)
-    : QMainWindow(parent)
+AutoDxfCpp::AutoDxfCpp(bool showMenu, QWidget* parent)
+    : QMainWindow(parent), m_showMenu(showMenu)
 {
     ui.setupUi(this);
+
+    // Hide menu bar for split windows
+    if (!m_showMenu) {
+        ui.menuBar->hide();
+    }
 
     // Create your OpenGL widget
     m_oglWidget = new MyQOpenGLWidget(this);
@@ -19,6 +29,7 @@ AutoDxfCpp::AutoDxfCpp(QWidget* parent)
     // Top Menu
 	connect(ui.actionLoad, &QAction::triggered, this, &AutoDxfCpp::OnLoadDxf);
 	connect(ui.actionClear, &QAction::triggered, m_oglWidget, &MyQOpenGLWidget::OnClearDxf);
+	connect(ui.actionSplit, &QAction::triggered, this, &AutoDxfCpp::OnSplit);
     connect(m_oglWidget, &MyQOpenGLWidget::MouseMoved, this, &AutoDxfCpp::OnMouseMoved);
 
     // Tree View
@@ -50,6 +61,98 @@ void AutoDxfCpp::OnLoadDxf()
     m_oglWidget->loadDxf(fileName);
 }
 
+void AutoDxfCpp::OnSplit()
+{
+    bool ok;
+    QString cutterLayer = QInputDialog::getText(
+        this,
+        tr("Split"),
+        tr("Cutter layer name:"),
+        QLineEdit::Normal,
+        "1",
+        &ok);
+
+    if (!ok || cutterLayer.isEmpty())
+        return;
+
+    const auto& entities = m_oglWidget->getEntities();
+
+    std::vector<Polyline*> trimlines;
+    std::vector<Polyline*> ogPolylines;
+
+    for (const auto& entity : entities) {
+        Polyline* poly = dynamic_cast<Polyline*>(entity.get());
+        if (!poly) continue;
+
+        QString layer = QString::fromUtf8(entity->getLayer());
+        if (layer == cutterLayer) {
+            trimlines.push_back(poly);
+        } else {
+            ogPolylines.push_back(poly);
+        }
+    }
+
+    // For each ogPly, collect all intersections from all trimlines, sort, and split
+    std::vector<std::shared_ptr<Entity>> trimmedEntities;
+    std::vector<glm::vec2> allIntersectionPts;
+
+    for (auto* ogPly : ogPolylines) {
+        // Accumulate intersections from all trimlines for this ogPly
+        std::vector<AutoDxfHelper::IntersectionPoint> ips;
+        for (auto* trimline : trimlines) {
+            auto hits = AutoDxfHelper::PolylineIntersections(
+                ogPly->getPolyVertices(), ogPly->getIsClosed(),
+                trimline->getPolyVertices(), trimline->getIsClosed());
+            ips.insert(ips.end(), hits.begin(), hits.end());
+        }
+
+        // Collect intersection points for display
+        for (const auto& ip : ips) {
+            allIntersectionPts.push_back(ip.point);
+        }
+
+        // Sort by segmentIndex, then by parameter
+        std::sort(ips.begin(), ips.end(),
+            [](const AutoDxfHelper::IntersectionPoint& a,
+               const AutoDxfHelper::IntersectionPoint& b) {
+                if (a.segmentIndex != b.segmentIndex)
+                    return a.segmentIndex < b.segmentIndex;
+                return a.parameter < b.parameter;
+            });
+
+        // Split the ogPly at intersection points
+        auto subPolys = AutoDxfHelper::SplitPolyline(
+            ogPly->getPolyVertices(), ogPly->getIsClosed(), ips);
+
+        // Create Polyline entities from trimmed results
+        for (auto& verts : subPolys) {
+            if (verts.size() < 2) continue;
+            auto trimmed = std::make_shared<Polyline>(verts, false);
+            trimmed->setColor(0.0f, 1.0f, 0.0f); // Green for trimmed
+            trimmed->setLayer(ogPly->getLayer());
+            trimmedEntities.push_back(trimmed);
+        }
+    }
+
+    qDebug() << "Trimlines:" << trimlines.size()
+             << "OgPolylines:" << ogPolylines.size()
+             << "Intersection points:" << allIntersectionPts.size()
+             << "Trimmed sub-polylines:" << trimmedEntities.size();
+
+    // Create split window and display results
+    AutoDxfCpp* splitWindow = new AutoDxfCpp(false);
+    splitWindow->setAttribute(Qt::WA_DeleteOnClose);
+    splitWindow->setWindowTitle("AutoDxfCpp - Split");
+    splitWindow->show();
+
+    MyQOpenGLWidget* targetWidget = splitWindow->getOglWidget();
+    QTimer::singleShot(0, targetWidget,
+        [targetWidget, trimmedEntities, allIntersectionPts]() {
+            targetWidget->addEntities(trimmedEntities);
+            targetWidget->addIntersectionPoints(allIntersectionPts);
+        });
+}
+
 void AutoDxfCpp::OnUpdateTreeModel(QStandardItemModel* model)
 {
     model->setParent(this);// Set MainWindow as parent to take ownership
@@ -69,11 +172,11 @@ void AutoDxfCpp::onTreeItemClicked(const QModelIndex& index) {
     QStandardItem* item = model->itemFromIndex(index);
     if (!item) return;
 
-    Entity* entity = reinterpret_cast<Entity*>(item->data(Qt::UserRole).value<void*>());
+    auto entity = item->data(Qt::UserRole).value<std::shared_ptr<Entity>>();
     if (entity) {
         qDebug() << "Clicked entity type:" << QString::fromStdString(entity->getType());
         // Do something with the actual entity
-        m_oglWidget->highlightSelectedEntity(entity);
+        m_oglWidget->highlightSelectedEntity(entity.get());
     }
     else 
     {
@@ -97,8 +200,8 @@ void AutoDxfCpp::onEntitySelectedInViewport(Entity* entity)
 
     for (int i = 0; i < root->rowCount(); ++i) {
         QStandardItem* item = root->child(i);
-        Entity* itemEntity = reinterpret_cast<Entity*>(item->data(Qt::UserRole).value<void*>());
-        if (itemEntity == entity) {
+        auto itemEntity = item->data(Qt::UserRole).value<std::shared_ptr<Entity>>();
+        if (itemEntity.get() == entity) {
             ui.treeView->setCurrentIndex(item->index());
             return;
         }

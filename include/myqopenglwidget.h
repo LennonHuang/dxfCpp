@@ -1,12 +1,13 @@
-#pragma once  
-#include <QOpenGLWidget>  
-#include <QOpenGLFunctions_3_3_Core>  
-#include <QOpenGLShaderProgram>  
-#include <Render2D.h>  
-#include "Dxfloader.h"  
-#include <QMouseEvent>  
-#include <QWheelEvent>  
+#pragma once
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLShaderProgram>
+#include <Render2D.h>
+#include "Dxfloader.h"
+#include <QMouseEvent>
+#include <QWheelEvent>
 #include <QStandardItemModel>
+#include <glm/vec2.hpp>
 
 class MyQOpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core  
 {  
@@ -18,6 +19,10 @@ public:
    // Add the missing method declaration  
    void loadDxf(const QString& fileName);
    void highlightSelectedEntity(Entity* selectedEntity);
+   void addIntersectionPoints(const std::vector<glm::vec2>& points);
+   void addEntities(const std::vector<std::shared_ptr<Entity>>& entities);
+   const std::vector<std::shared_ptr<Entity>>& getEntities() const;
+   QString getLoadedFilePath() const { return m_loadedFilePath; }
 
 public slots:
 	void OnClearDxf();
@@ -40,8 +45,9 @@ protected:
 
 
 private:  
-   Render2D* m_renderer;  
+   std::unique_ptr<Render2D> m_renderer;
    Entity* m_selectedEntity = nullptr;
-   QPoint m_lastMousePos;  
-   bool m_panning = false;  
+   QPoint m_lastMousePos;
+   bool m_panning = false;
+   QString m_loadedFilePath;
 };

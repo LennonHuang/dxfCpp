@@ -28,6 +28,9 @@ public:
 		_alpha = alpha;
 	}
 
+    const std::string& getLayer() const { return _layer; }
+    void setLayer(const std::string& layer) { _layer = layer; }
+
     // Buffer setup/teardown
     virtual void createBuffers(QOpenGLFunctions_3_3_Core* f);
     virtual void deleteBuffers(QOpenGLFunctions_3_3_Core* f);
@@ -38,6 +41,7 @@ public:
 protected:
     float _color[3] = { 1.0f, 1.0f, 1.0f };   // Default: white
 	float _alpha = 1.0f; // Default: fully opaque
+    std::string _layer;
 
     // OpenGL handles for a simple VAO + VBO
     GLuint _vAO = 0;

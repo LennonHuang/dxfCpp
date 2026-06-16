@@ -1,6 +1,8 @@
 #include "myqopenglwidget.h"
 #include <QOpenGLContext>
 #include <QOpenGLVersionFunctionsFactory>
+#include "Entities/Circle.h"
+//Q_DECLARE_METATYPE(std::shared_ptr<Entity>)
 
 MyQOpenGLWidget::MyQOpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent),
@@ -12,9 +14,7 @@ MyQOpenGLWidget::MyQOpenGLWidget(QWidget* parent)
 MyQOpenGLWidget::~MyQOpenGLWidget()
 {
     makeCurrent();
-
-    delete m_renderer;
-    m_renderer = nullptr;
+    m_renderer.reset();// can only delete gl-related objects here
     doneCurrent();
 }
 
@@ -31,7 +31,7 @@ void MyQOpenGLWidget::initializeGL()
     f->initializeOpenGLFunctions();
 
     // Create and initialize renderer
-    m_renderer = new Render2D(width(), height());
+    m_renderer =  std::make_unique<Render2D>(width(), height());
     m_renderer->initGL(f);
     m_renderer->setupProjection(f);
 }
@@ -68,6 +68,8 @@ void MyQOpenGLWidget::loadDxf(const QString& fileName)
         return;
     }
 
+    m_loadedFilePath = fileName;
+
     makeCurrent();  // IMPORTANT: ensure GL context is current
 
     // Ask for the 3.3 Core functions for the current context
@@ -100,8 +102,8 @@ void MyQOpenGLWidget::loadDxf(const QString& fileName)
 
             QStandardItem* entityItem = new QStandardItem(itemName);
 
-            // Store the raw pointer in the item using QVariant
-            entityItem->setData(QVariant::fromValue(reinterpret_cast<void*>(entity.get())), Qt::UserRole);
+            // Store the shared pointer in the item using QVariant
+            entityItem->setData(QVariant::fromValue(entity), Qt::UserRole);
 
             dxfItem->appendRow(entityItem);
         }
@@ -199,6 +201,50 @@ void MyQOpenGLWidget::mouseReleaseEvent(QMouseEvent* event)
     else {
         event->ignore();
     }
+}
+
+const std::vector<std::shared_ptr<Entity>>& MyQOpenGLWidget::getEntities() const
+{
+    return m_renderer->getEntities();
+}
+
+void MyQOpenGLWidget::addEntities(const std::vector<std::shared_ptr<Entity>>& entities)
+{
+    if (!m_renderer || entities.empty())
+        return;
+
+    makeCurrent();
+    auto* f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(context());
+    if (!f) return;
+
+    for (auto& entity : entities) {
+        entity->createBuffers(f);
+        m_renderer->addEntity(entity);
+    }
+
+    update();
+    doneCurrent();
+}
+
+void MyQOpenGLWidget::addIntersectionPoints(const std::vector<glm::vec2>& points)
+{
+    if (!m_renderer || points.empty())
+        return;
+
+    makeCurrent();
+    auto* f = QOpenGLVersionFunctionsFactory::get<QOpenGLFunctions_3_3_Core>(context());
+    if (!f) return;
+
+    for (const auto& pt : points) {
+        auto marker = std::make_shared<Circle>(pt.x, pt.y, 0.5f, 16);
+        marker->setColor(1.0f, 1.0f, 0.0f); // Yellow
+        marker->setLayer("intersection");
+        marker->createBuffers(f);
+        m_renderer->addEntity(marker);
+    }
+
+    update();
+    doneCurrent();
 }
 
 void MyQOpenGLWidget::OnClearDxf()

@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// Include Qt¡¯s OpenGL 3.3 core functions
+// Include Qtï¿½ï¿½s OpenGL 3.3 core functions
 #include <QOpenGLFunctions_3_3_Core>
 #include <QPoint>
 #include "Entities/Entity.h"
@@ -21,6 +21,7 @@ public:
     ~Render2D();
 
     void addEntity(std::shared_ptr<Entity> entity);
+    const std::vector<std::shared_ptr<Entity>>& getEntities() const { return _entities; }
 
     // All methods that call OpenGL take a QOpenGLFunctions_3_3_Core*,
     // which must be obtained from the current context.
